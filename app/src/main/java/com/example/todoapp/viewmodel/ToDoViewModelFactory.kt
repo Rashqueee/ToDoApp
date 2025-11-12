@@ -6,6 +6,7 @@ import com.example.todoapp.model.Todo
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 interface TodoRepository {
@@ -23,10 +24,30 @@ class TodoViewModelWithRepo(
     private val _todos = MutableStateFlow<List<Todo>>(emptyList())
     val todos: StateFlow<List<Todo>> = _todos
 
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query
+
+    private val _filteredTodos = MutableStateFlow<List<Todo>>(emptyList())
+    val filteredTodos: StateFlow<List<Todo>> = _filteredTodos
+
     init {
         viewModelScope.launch {
             _todos.value = repo.loadAll()
+            _filteredTodos.value = _todos.value
         }
+
+        viewModelScope.launch {
+            combine(_todos, _query) { todos, query ->
+                if (query.isBlank()) todos
+                else todos.filter { it.title.contains(query, ignoreCase = true) }
+            }.collect { filtered ->
+                _filteredTodos.value = filtered
+            }
+        }
+    }
+
+    fun updateQuery(newQuery: String) {
+        _query.value = newQuery
     }
 
     fun addTask(title: String) {

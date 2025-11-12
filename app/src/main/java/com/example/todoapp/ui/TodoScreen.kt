@@ -12,10 +12,21 @@ import com.example.todoapp.viewmodel.TodoViewModelWithRepo
 
 @Composable
 fun TodoScreen(vm: TodoViewModelWithRepo) {
-    val todos by vm.todos.collectAsState()
+    val todos by vm.filteredTodos.collectAsState()
+    val query by vm.query.collectAsState()
     var text by rememberSaveable { mutableStateOf("") }
 
     Column(Modifier.padding(16.dp)) {
+
+        OutlinedTextField(
+            value = query,
+            onValueChange = { vm.updateQuery(it) },
+            label = { Text("Cari tugas...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        )
+
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
