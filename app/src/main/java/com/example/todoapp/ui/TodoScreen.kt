@@ -37,7 +37,7 @@ fun TodoScreen(vm: TodoViewModelWithRepo) {
             Text("Tambah")
         }
 
-        Divider()
+        HorizontalDivider()
 
         FilterControls(
             selectedFilter = currentFilter,

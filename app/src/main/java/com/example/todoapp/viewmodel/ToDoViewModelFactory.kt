@@ -27,21 +27,21 @@ class TodoViewModelWithRepo(
     val statusFilter: StateFlow<StatusFilter> = _statusFilter
 
     // StateFlow yang mengkombinasikan todos dengan filter
-    val filteredTodos: StateFlow<List<Todo>> = combine(_todos, _statusFilter) { todos, filter ->
-        when (filter) {
-            StatusFilter.SEMUA -> todos
-            StatusFilter.AKTIF -> todos.filter { !it.isDone }
-            StatusFilter.SELESAI -> todos.filter { it.isDone }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    private val _filteredTodos = MutableStateFlow<List<Todo>>(emptyList())
+    val filteredTodos: StateFlow<List<Todo>> = _filteredTodos
+
 
     init {
         viewModelScope.launch {
             _todos.value = repo.loadAll()
+
+            combine(_todos, _statusFilter) { todos, filter ->
+                when (filter) {
+                    StatusFilter.SEMUA -> todos
+                    StatusFilter.AKTIF -> todos.filter { !it.isDone }
+                    StatusFilter.SELESAI -> todos.filter { it.isDone }
+                }
+            }.collect{ filtered -> _filteredTodos.value = filtered}
         }
     }
 

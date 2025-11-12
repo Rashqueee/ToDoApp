@@ -15,19 +15,6 @@ class TodoViewModel : ViewModel() {
     private val _statusFilter = MutableStateFlow(StatusFilter.SEMUA)
     val statusFilter: StateFlow<StatusFilter> = _statusFilter
 
-    // StateFlow yang mengkombinasikan todos dengan filter
-    val filteredTodos: StateFlow<List<Todo>> = combine(_todos, _statusFilter) { todos, filter ->
-        when (filter) {
-            StatusFilter.SEMUA -> todos
-            StatusFilter.AKTIF -> todos.filter { !it.isDone }
-            StatusFilter.SELESAI -> todos.filter { it.isDone }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
     fun addTask(title: String) {
         val nextId = (_todos.value.maxOfOrNull { it.id } ?: 0) + 1
         val newTask = Todo(id = nextId, title = title)
