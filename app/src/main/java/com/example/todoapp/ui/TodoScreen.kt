@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.todoapp.viewmodel.TodoViewModelWithRepo
@@ -17,7 +18,6 @@ fun TodoScreen(vm: TodoViewModelWithRepo) {
     var text by rememberSaveable { mutableStateOf("") }
 
     Column(Modifier.padding(16.dp)) {
-
         OutlinedTextField(
             value = query,
             onValueChange = { vm.updateQuery(it) },
@@ -44,6 +44,19 @@ fun TodoScreen(vm: TodoViewModelWithRepo) {
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             Text("Tambah")
+        }
+
+        val total = todos.size
+        val done = todos.count { it.isDone }
+
+        if (total > 0) {
+            Text(
+                text = "Total: $total • Selesai: $done",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .align(Alignment.End)
+            )
         }
 
         Divider()

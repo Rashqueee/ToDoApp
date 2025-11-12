@@ -16,7 +16,6 @@ interface TodoRepository {
     suspend fun delete(id: Int)
 }
 
-
 class TodoViewModelWithRepo(
     private val repo: TodoRepository
 ) : ViewModel() {
