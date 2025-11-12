@@ -1,14 +1,19 @@
 package com.example.todoapp.viewmodel
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.*
 import com.example.todoapp.model.Todo
+import com.example.todoapp.model.StatusFilter
 
 class TodoViewModel : ViewModel() {
 
     private val _todos = MutableStateFlow<List<Todo>>(emptyList())
     val todos: StateFlow<List<Todo>> = _todos
+
+    // StateFlow untuk menyimpan status filter
+    private val _statusFilter = MutableStateFlow(StatusFilter.SEMUA)
+    val statusFilter: StateFlow<StatusFilter> = _statusFilter
 
     fun addTask(title: String) {
         val nextId = (_todos.value.maxOfOrNull { it.id } ?: 0) + 1
@@ -24,5 +29,10 @@ class TodoViewModel : ViewModel() {
 
     fun deleteTask(id: Int) {
         _todos.value = _todos.value.filterNot { it.id == id }
+    }
+
+    // Fungsi untuk mengubah status filter
+    fun setStatusFilter(filter: StatusFilter) {
+        _statusFilter.value = filter
     }
 }
