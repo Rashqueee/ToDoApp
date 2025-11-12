@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
 
         val repo = InMemoryTodoRepository()
         val factory = TodoViewModelFactory(repo)
+        val filter =
 
         setContent {
             MaterialTheme {

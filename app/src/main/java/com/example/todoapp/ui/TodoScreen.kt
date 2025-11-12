@@ -8,12 +8,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.todoapp.model.StatusFilter
 import com.example.todoapp.viewmodel.TodoViewModelWithRepo
 
 @Composable
 fun TodoScreen(vm: TodoViewModelWithRepo) {
-    val todos by vm.todos.collectAsState()
+    val todos by vm.filteredTodos.collectAsState()
     var text by rememberSaveable { mutableStateOf("") }
+    val currentFilter by vm.statusFilter.collectAsState()
 
     Column(Modifier.padding(16.dp)) {
         OutlinedTextField(
@@ -37,6 +39,11 @@ fun TodoScreen(vm: TodoViewModelWithRepo) {
 
         Divider()
 
+        FilterControls(
+            selectedFilter = currentFilter,
+            onFilterSelected = { vm.setStatusFilter(it) }
+        )
+
         LazyColumn {
             items(todos) { todo ->
                 TodoItem(
@@ -45,6 +52,39 @@ fun TodoScreen(vm: TodoViewModelWithRepo) {
                     onDelete = { vm.deleteTask(todo.id) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun FilterButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        onClick = onClick,
+        selected = isSelected,
+        label = {
+            Text(text = text)
+        },
+    )
+}
+
+@Composable
+fun FilterControls(
+    selectedFilter: StatusFilter,
+    onFilterSelected: (StatusFilter) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        FilterButton("Semua", selectedFilter == StatusFilter.SEMUA) {
+            onFilterSelected(StatusFilter.SEMUA)
+        }
+        FilterButton("Aktif", selectedFilter == StatusFilter.AKTIF) {
+            onFilterSelected(StatusFilter.AKTIF)
+        }
+        FilterButton("Selesai", selectedFilter == StatusFilter.SELESAI) {
+            onFilterSelected(StatusFilter.SELESAI)
         }
     }
 }

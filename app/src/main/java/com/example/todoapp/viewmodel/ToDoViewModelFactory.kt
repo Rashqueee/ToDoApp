@@ -2,10 +2,10 @@ package com.example.todoapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.todoapp.model.Todo
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.todoapp.model.Todo
+import com.example.todoapp.model.StatusFilter
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 interface TodoRepository {
@@ -15,13 +15,29 @@ interface TodoRepository {
     suspend fun delete(id: Int)
 }
 
-
 class TodoViewModelWithRepo(
     private val repo: TodoRepository
 ) : ViewModel() {
 
     private val _todos = MutableStateFlow<List<Todo>>(emptyList())
     val todos: StateFlow<List<Todo>> = _todos
+
+    // StateFlow untuk menyimpan status filter
+    private val _statusFilter = MutableStateFlow(StatusFilter.SEMUA)
+    val statusFilter: StateFlow<StatusFilter> = _statusFilter
+
+    // StateFlow yang mengkombinasikan todos dengan filter
+    val filteredTodos: StateFlow<List<Todo>> = combine(_todos, _statusFilter) { todos, filter ->
+        when (filter) {
+            StatusFilter.SEMUA -> todos
+            StatusFilter.AKTIF -> todos.filter { !it.isDone }
+            StatusFilter.SELESAI -> todos.filter { it.isDone }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     init {
         viewModelScope.launch {
@@ -48,6 +64,11 @@ class TodoViewModelWithRepo(
             repo.delete(id)
             _todos.value = repo.loadAll()
         }
+    }
+
+    // Fungsi untuk mengubah status filter
+    fun setStatusFilter(filter: StatusFilter) {
+        _statusFilter.value = filter
     }
 }
 
