@@ -8,11 +8,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.todoapp.viewmodel.TodoViewModel
+import com.example.todoapp.viewmodel.TodoViewModelWithRepo
 
 @Composable
-fun TodoScreen(vm: TodoViewModel = viewModel()) {
+fun TodoScreen(vm: TodoViewModelWithRepo) {
     val todos by vm.todos.collectAsState()
     var text by rememberSaveable { mutableStateOf("") }
 
