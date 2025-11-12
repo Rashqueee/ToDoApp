@@ -38,20 +38,24 @@ class TodoViewModelWithRepo(
         viewModelScope.launch {
             _todos.value = repo.loadAll()
 
-            combine(_todos, _statusFilter) { todos, filter ->
-                when (filter) {
+            combine(_todos, _statusFilter, _query) { todos, filter, query ->
+                val tempTodos = when (filter) {
                     StatusFilter.SEMUA -> todos
                     StatusFilter.AKTIF -> todos.filter { !it.isDone }
                     StatusFilter.SELESAI -> todos.filter { it.isDone }
                 }
+
+                if (query.isBlank()) tempTodos
+                else tempTodos.filter { it.title.contains(query, ignoreCase = true) }
+
             }.collect{ filtered -> _filteredTodos.value = filtered}
 
-            combine(_filteredTodos, _query) { todos, query ->
-                if (query.isBlank()) todos
-                else todos.filter { it.title.contains(query, ignoreCase = true) }
-            }.collect { filtered ->
-                _filteredTodos.value = filtered
-            }
+//            combine(_filteredTodos, _query) { todos, query ->
+//                if (query.isBlank()) todos
+//                else todos.filter { it.title.contains(query, ignoreCase = true) }
+//            }.collect { filtered ->
+//                _filteredTodos.value = filtered
+//            }
         }
     }
 
