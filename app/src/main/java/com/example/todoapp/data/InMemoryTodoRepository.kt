@@ -9,7 +9,7 @@ class InMemoryTodoRepository : TodoRepository {
     private var nextId = 1
 
     override suspend fun loadAll(): List<Todo> {
-        delay(100) // simulasi loading dari database
+        delay(100)
         return todos.toList()
     }
 

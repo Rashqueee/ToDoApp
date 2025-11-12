@@ -22,6 +22,9 @@ class TodoViewModelWithRepo(
     private val _todos = MutableStateFlow<List<Todo>>(emptyList())
     val todos: StateFlow<List<Todo>> = _todos
 
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query
+
     // StateFlow untuk menyimpan status filter
     private val _statusFilter = MutableStateFlow(StatusFilter.SEMUA)
     val statusFilter: StateFlow<StatusFilter> = _statusFilter
@@ -42,7 +45,18 @@ class TodoViewModelWithRepo(
                     StatusFilter.SELESAI -> todos.filter { it.isDone }
                 }
             }.collect{ filtered -> _filteredTodos.value = filtered}
+
+            combine(_filteredTodos, _query) { todos, query ->
+                if (query.isBlank()) todos
+                else todos.filter { it.title.contains(query, ignoreCase = true) }
+            }.collect { filtered ->
+                _filteredTodos.value = filtered
+            }
         }
+    }
+
+    fun updateQuery(newQuery: String) {
+        _query.value = newQuery
     }
 
     fun addTask(title: String) {
